@@ -1,20 +1,21 @@
 from flask import Flask, request, render_template, redirect, jsonify
-from flask_jsglue import JSGlue # this is use for url_for() working inside javascript which is help us to navigate the url
+#from flask_jsglue import JSGlue # this is use for url_for() working inside javascript which is help us to navigate the url
 import util
 import os
 from werkzeug.utils import secure_filename
+import requests
 
 application = Flask(__name__)
 
-# JSGlue is use for url_for() working inside javascript which is help us to navigate the url
-jsglue = JSGlue() # create a object of JsGlue
-jsglue.init_app(application) # and assign the app as a init app to the instance of JsGlue
+#JSGlue is use for url_for() working inside javascript which is help us to navigate the url
+#jsglue = JSGlue() # create a object of JsGlue
+#jsglue.init_app(application) # and assign the app as a init app to the instance of JsGlue
 
 util.load_artifacts()
 #home page
-@application.route("/")
-def home():
-    return render_template("home.html")
+#@application.route("/")
+#def home():
+#   return render_template("home.html")
 
 #classify waste
 @application.route("/classifywaste", methods = ["POST"])
@@ -24,8 +25,10 @@ def classifywaste():
     basepath = os.path.dirname(__file__)
     image_path = os.path.join(basepath, "uploads", secure_filename(image_data.filename))
     image_data.save(image_path)
-
+   # URL='http://192.168.251.48/26/right'
+    #r = requests.get(url = URL)
     predicted_value, details, video1, video2 = util.classify_waste(image_path)
+    print(predicted_value)
     os.remove(image_path)
     return jsonify(predicted_value=predicted_value, details=details, video1=video1, video2=video2)
 
@@ -36,4 +39,4 @@ def page_not_found(e):
     return render_template("404.html"), 404
 
 if __name__ == "__main__":
-    application.run()
+    application.run(debug=True, host='localhost', port=3000)
